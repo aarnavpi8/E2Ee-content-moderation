@@ -1,0 +1,17 @@
+# Rust build artifacts
+/target
+**/target
+
+# Client runtime session state (contains ephemeral keys; not source)
+*_state.json
+alice_message.json
+
+# Python caches
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

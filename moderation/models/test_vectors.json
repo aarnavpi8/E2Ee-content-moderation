@@ -1,0 +1,59 @@
+{
+  "model": "model_d256.json",
+  "vectors": [
+    {
+      "message": "Free entry now, WIN a prize!!!",
+      "d": 256,
+      "nonzero_features": {
+        "19": 1,
+        "27": 1,
+        "47": 1,
+        "57": 1,
+        "140": -1,
+        "151": 1
+      },
+      "score_q": 116805,
+      "prediction": "ham/allowed"
+    },
+    {
+      "message": "hey are we still on for lunch",
+      "d": 256,
+      "nonzero_features": {
+        "17": 1,
+        "77": 1,
+        "95": 1,
+        "112": -1,
+        "125": 1,
+        "144": -1,
+        "169": 1
+      },
+      "score_q": 340462,
+      "prediction": "ham/allowed"
+    },
+    {
+      "message": "URGENT! call 09061701461 to claim",
+      "d": 256,
+      "nonzero_features": {
+        "44": -1,
+        "164": -1,
+        "169": 1,
+        "207": 1,
+        "240": -1
+      },
+      "score_q": 292101,
+      "prediction": "ham/allowed"
+    },
+    {
+      "message": "ok see you tomorrow",
+      "d": 256,
+      "nonzero_features": {
+        "38": -1,
+        "64": -1,
+        "92": -1,
+        "239": 1
+      },
+      "score_q": 374919,
+      "prediction": "ham/allowed"
+    }
+  ]
+}

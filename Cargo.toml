@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "crypto-core",
+    "client",
+    "server",
+    "moderation-core",
+]
+resolver = "2"

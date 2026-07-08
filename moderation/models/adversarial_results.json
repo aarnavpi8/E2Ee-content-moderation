@@ -1,0 +1,62 @@
+{
+  "d": 256,
+  "num_blocked_spam": 672,
+  "classes": {
+    "synonym": {
+      "budget_1": {
+        "evaded": 29,
+        "evasion_rate": 0.0432
+      },
+      "budget_2": {
+        "evaded": 47,
+        "evasion_rate": 0.0699
+      },
+      "budget_3": {
+        "evaded": 53,
+        "evasion_rate": 0.0789
+      }
+    },
+    "homoglyph": {
+      "budget_1": {
+        "evaded": 115,
+        "evasion_rate": 0.1711
+      },
+      "budget_2": {
+        "evaded": 229,
+        "evasion_rate": 0.3408
+      },
+      "budget_3": {
+        "evaded": 331,
+        "evasion_rate": 0.4926
+      }
+    },
+    "whitespace": {
+      "budget_1": {
+        "evaded": 110,
+        "evasion_rate": 0.1637
+      },
+      "budget_2": {
+        "evaded": 212,
+        "evasion_rate": 0.3155
+      },
+      "budget_3": {
+        "evaded": 278,
+        "evasion_rate": 0.4137
+      }
+    }
+  },
+  "examples": {
+    "synonym": {
+      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
+      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next message message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
+    },
+    "homoglyph": {
+      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
+      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next tхt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
+    },
+    "whitespace": {
+      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
+      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next t​xt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
+    }
+  }
+}

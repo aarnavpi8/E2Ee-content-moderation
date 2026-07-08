@@ -1,0 +1,108 @@
+{
+  "scale": 65536,
+  "seed": 42,
+  "dims": {
+    "64": {
+      "metrics_float": {
+        "accuracy": 0.9148,
+        "spam_precision": 0.7288,
+        "spam_recall": 0.5772,
+        "spam_f1": 0.6442,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            86,
+            63
+          ],
+          [
+            32,
+            934
+          ]
+        ]
+      },
+      "metrics_quantized": {
+        "accuracy": 0.9148,
+        "spam_precision": 0.7288,
+        "spam_recall": 0.5772,
+        "spam_f1": 0.6442,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            86,
+            63
+          ],
+          [
+            32,
+            934
+          ]
+        ]
+      }
+    },
+    "256": {
+      "metrics_float": {
+        "accuracy": 0.9695,
+        "spam_precision": 0.9021,
+        "spam_recall": 0.8658,
+        "spam_f1": 0.8836,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            129,
+            20
+          ],
+          [
+            14,
+            952
+          ]
+        ]
+      },
+      "metrics_quantized": {
+        "accuracy": 0.9695,
+        "spam_precision": 0.9021,
+        "spam_recall": 0.8658,
+        "spam_f1": 0.8836,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            129,
+            20
+          ],
+          [
+            14,
+            952
+          ]
+        ]
+      }
+    },
+    "1024": {
+      "metrics_float": {
+        "accuracy": 0.9749,
+        "spam_precision": 0.9618,
+        "spam_recall": 0.8456,
+        "spam_f1": 0.9,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            126,
+            23
+          ],
+          [
+            5,
+            961
+          ]
+        ]
+      },
+      "metrics_quantized": {
+        "accuracy": 0.9749,
+        "spam_precision": 0.9618,
+        "spam_recall": 0.8456,
+        "spam_f1": 0.9,
+        "confusion_matrix_[[tn,fp],[fn,tp]]": [
+          [
+            126,
+            23
+          ],
+          [
+            5,
+            961
+          ]
+        ]
+      }
+    }
+  }
+}
