@@ -1,58 +1,58 @@
 {
   "d": 256,
-  "num_blocked_spam": 672,
+  "num_blocked_spam": 724,
   "classes": {
     "synonym": {
       "budget_1": {
-        "evaded": 29,
-        "evasion_rate": 0.0432
+        "evaded": 14,
+        "evasion_rate": 0.0193
       },
       "budget_2": {
-        "evaded": 47,
-        "evasion_rate": 0.0699
+        "evaded": 45,
+        "evasion_rate": 0.0622
       },
       "budget_3": {
-        "evaded": 53,
-        "evasion_rate": 0.0789
+        "evaded": 57,
+        "evasion_rate": 0.0787
       }
     },
     "homoglyph": {
       "budget_1": {
-        "evaded": 115,
-        "evasion_rate": 0.1711
+        "evaded": 109,
+        "evasion_rate": 0.1506
       },
       "budget_2": {
-        "evaded": 229,
-        "evasion_rate": 0.3408
+        "evaded": 252,
+        "evasion_rate": 0.3481
       },
       "budget_3": {
-        "evaded": 331,
-        "evasion_rate": 0.4926
+        "evaded": 370,
+        "evasion_rate": 0.511
       }
     },
     "whitespace": {
       "budget_1": {
-        "evaded": 110,
-        "evasion_rate": 0.1637
+        "evaded": 91,
+        "evasion_rate": 0.1257
       },
       "budget_2": {
-        "evaded": 212,
-        "evasion_rate": 0.3155
+        "evaded": 208,
+        "evasion_rate": 0.2873
       },
       "budget_3": {
-        "evaded": 278,
-        "evasion_rate": 0.4137
+        "evaded": 302,
+        "evasion_rate": 0.4171
       }
     }
   },
   "examples": {
     "synonym": {
-      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
-      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next message message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
+      "original": "Urgent Ur £500 guaranteed award is still unclaimed! Call 09066368327 NOW closingdate04/09/02 claimcode M39M51 £1.50pmmorefrommobile2Bremoved-MobyPOBox734LS27YF",
+      "perturbed": "Urgent Ur £500 assured award is still unclaimed! Call 09066368327 NOW closingdate04/09/02 claimcode M39M51 £1.50pmmorefrommobile2Bremoved-MobyPOBox734LS27YF"
     },
     "homoglyph": {
-      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
-      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next tхt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
+      "original": "FreeMsg Hey there darling it's been 3 week's now and no word back! I'd like some fun you up for it still? Tb ok! XxX std chgs to send, £1.50 to rcv",
+      "perturbed": "FreeMsg Hey there darling it's been 3 week's now and no word back! I'd like some fun you up for it still? Tb ok! XxX std chgs to sеnd, £1.50 to rcv"
     },
     "whitespace": {
       "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",

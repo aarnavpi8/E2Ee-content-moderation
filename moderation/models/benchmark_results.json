@@ -3,40 +3,40 @@
   "iters": 30,
   "results": [
     {
-      "added_latency_ms_median": 30.748807,
-      "added_latency_ms_p95": 81.325785,
-      "build_ms": 9.907374,
+      "added_latency_ms_median": 62.7482,
+      "added_latency_ms_p95": 74.7502,
+      "build_ms": 68.2266,
       "d": 64,
-      "proof_bytes": 94060,
-      "prove_ms_median": 26.355342,
-      "prove_ms_p95": 76.670006,
-      "prove_speedup_vs_baseline_3s": 113.82891559517611,
-      "verify_ms_median": 4.507802,
-      "verify_ms_p95": 7.759455999999999
+      "proof_bytes": 116040,
+      "prove_ms_median": 59.3852,
+      "prove_ms_p95": 71.3703,
+      "prove_speedup_vs_baseline_3s": 50.51763739113449,
+      "verify_ms_median": 3.363,
+      "verify_ms_p95": 3.7689
     },
     {
-      "added_latency_ms_median": 55.437247000000006,
-      "added_latency_ms_p95": 80.571947,
-      "build_ms": 30.063913,
+      "added_latency_ms_median": 290.09540000000004,
+      "added_latency_ms_p95": 603.6425,
+      "build_ms": 112.6182,
       "d": 256,
-      "proof_bytes": 103404,
-      "prove_ms_median": 48.700711,
-      "prove_ms_p95": 74.545661,
-      "prove_speedup_vs_baseline_3s": 61.6007433649172,
-      "verify_ms_median": 4.88259,
-      "verify_ms_p95": 8.230813
+      "proof_bytes": 121480,
+      "prove_ms_median": 279.89570000000003,
+      "prove_ms_p95": 596.3304,
+      "prove_speedup_vs_baseline_3s": 10.718278272942385,
+      "verify_ms_median": 9.481200000000001,
+      "verify_ms_p95": 14.4836
     },
     {
-      "added_latency_ms_median": 200.904867,
-      "added_latency_ms_p95": 269.196407,
-      "build_ms": 96.298839,
+      "added_latency_ms_median": 559.9578,
+      "added_latency_ms_p95": 596.124,
+      "build_ms": 497.6109,
       "d": 1024,
-      "proof_bytes": 121480,
-      "prove_ms_median": 193.542959,
-      "prove_ms_p95": 260.088403,
-      "prove_speedup_vs_baseline_3s": 15.500434712274913,
-      "verify_ms_median": 7.226464999999999,
-      "verify_ms_p95": 9.712677
+      "proof_bytes": 126984,
+      "prove_ms_median": 550.6015,
+      "prove_ms_p95": 585.4108,
+      "prove_speedup_vs_baseline_3s": 5.448586682019574,
+      "verify_ms_median": 10.4495,
+      "verify_ms_p95": 10.9751
     }
   ]
 }

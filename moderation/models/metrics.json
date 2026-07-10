@@ -1,17 +1,20 @@
 {
-  "scale": 65536,
+  "arch": "mlp-1hidden-relu",
+  "hidden_dim": 16,
+  "s1": 4096,
+  "s2": 4096,
   "seed": 42,
   "dims": {
     "64": {
       "metrics_float": {
-        "accuracy": 0.9148,
-        "spam_precision": 0.7288,
-        "spam_recall": 0.5772,
-        "spam_f1": 0.6442,
+        "accuracy": 0.9354,
+        "spam_precision": 0.773,
+        "spam_recall": 0.7315,
+        "spam_f1": 0.7517,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            86,
-            63
+            109,
+            40
           ],
           [
             32,
@@ -20,14 +23,14 @@
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9148,
-        "spam_precision": 0.7288,
-        "spam_recall": 0.5772,
-        "spam_f1": 0.6442,
+        "accuracy": 0.9354,
+        "spam_precision": 0.773,
+        "spam_recall": 0.7315,
+        "spam_f1": 0.7517,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            86,
-            63
+            109,
+            40
           ],
           [
             32,
@@ -38,48 +41,48 @@
     },
     "256": {
       "metrics_float": {
-        "accuracy": 0.9695,
-        "spam_precision": 0.9021,
+        "accuracy": 0.9623,
+        "spam_precision": 0.8543,
         "spam_recall": 0.8658,
-        "spam_f1": 0.8836,
+        "spam_f1": 0.86,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
             129,
             20
           ],
           [
-            14,
-            952
+            22,
+            944
           ]
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9695,
-        "spam_precision": 0.9021,
+        "accuracy": 0.9623,
+        "spam_precision": 0.8543,
         "spam_recall": 0.8658,
-        "spam_f1": 0.8836,
+        "spam_f1": 0.86,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
             129,
             20
           ],
           [
-            14,
-            952
+            22,
+            944
           ]
         ]
       }
     },
     "1024": {
       "metrics_float": {
-        "accuracy": 0.9749,
-        "spam_precision": 0.9618,
-        "spam_recall": 0.8456,
-        "spam_f1": 0.9,
+        "accuracy": 0.9758,
+        "spam_precision": 0.9621,
+        "spam_recall": 0.8523,
+        "spam_f1": 0.9039,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            126,
-            23
+            127,
+            22
           ],
           [
             5,
@@ -88,18 +91,18 @@
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9749,
-        "spam_precision": 0.9618,
-        "spam_recall": 0.8456,
-        "spam_f1": 0.9,
+        "accuracy": 0.9767,
+        "spam_precision": 0.9695,
+        "spam_recall": 0.8523,
+        "spam_f1": 0.9071,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            126,
-            23
+            127,
+            22
           ],
           [
-            5,
-            961
+            4,
+            962
           ]
         ]
       }

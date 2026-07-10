@@ -42,6 +42,18 @@ middlebox literature (Phase 5 will measure this empirically).
 The `d = 1024` configuration scales the dot product by 4× (~1k–2k gates), still
 below one recursion step; expected to remain sub-second.
 
+### Addendum: MLP instead of a linear model
+
+This build uses a **one-hidden-layer MLP** (hidden width `H = 16`, ReLU) rather
+than the linear classifier — reversing the plan's original "MLP cut". The extra
+in-circuit cost is: `H·d` multiply-adds for the hidden layer (e.g. 16·256 ≈ 4k at
+d = 256), plus `H` **ReLU gadgets**, each a positive/negative decomposition with
+two 48-bit range checks and one product constraint (`pos·neg = 0`). This pushes
+the circuit to roughly 10–20k gates and measured proving time to ~280 ms at
+d = 256 — still an order of magnitude under the 3 s baseline (see Phase 5). The
+scale-equivariance of ReLU means integer quantisation stays essentially lossless,
+so the decision remains **GO** for the MLP.
+
 ## 3. Binding-target decision: `Poseidon(m, r)` vs `Poseidon(φ(m), r)`
 
 **Decision: commit to the message, `h = Poseidon(m, r)`.**

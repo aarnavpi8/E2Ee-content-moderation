@@ -2,15 +2,17 @@
 //!
 //! Provides:
 //!   * `features`  — portable feature hashing (Rust port of `features.py`).
-//!   * `model`     — loader for the Phase-1 quantised linear model.
+//!   * `model`     — loader for the Phase-1 quantised MLP.
 //!   * the Plonky2 circuit that proves, in zero knowledge, that a committed
-//!     message passes the classifier:  `theta_q . f + bias_q >= tau_q`
-//!     AND  `Poseidon(pack(m), r) = h`.
+//!     message passes an MLP classifier:
+//!         h1  = relu(W1 . f + b1)
+//!         out =        W2 . h1 + b2   >=  tau_q
+//!     AND `Poseidon(pack(m), r) = h`.
 //!
-//! The circuit bakes the public model `(theta_q, bias_q, tau_q)` in as
-//! constants, so the resulting `CircuitData` (and its verifier data) is
-//! specific to one model — updating the model just rebuilds the circuit, with
-//! no trusted setup (Plonky2 is transparent).
+//! The circuit bakes the public model (W1, b1, W2, b2, tau_q) in as constants,
+//! so the resulting `CircuitData` (and its verifier data) is specific to one
+//! model — updating the model just rebuilds the circuit, with no trusted setup
+//! (Plonky2 is transparent).
 
 pub mod features;
 pub mod model;
@@ -51,9 +53,12 @@ const NUM_MSG_ELEMS: usize = 1 + NUM_MSG_CHUNKS;
 /// the dot product (a malicious prover otherwise choosing huge f to overflow).
 const FEATURE_ABS_MAX: u64 = 1 << 20;
 const FEATURE_RANGE_BITS: usize = 21; // f + 2^20 in [0, 2^21)
-/// The classifier margin `score - tau` is range-checked to [0, 2^58): a
-/// non-negative margin fits, a negative one aliases to ~2^64 and fails the check.
-/// 58 > worst-case |score| (~2^54 for d=1024) and < 64.
+/// ReLU decomposition parts `pos, neg` are range-checked to [0, 2^48); this
+/// bounds the hidden pre-activations (worst case ~2^42) and keeps them wrap-safe.
+const RELU_RANGE_BITS: usize = 48;
+/// The output margin `out - tau` is range-checked to [0, 2^58): a non-negative
+/// margin fits, a negative one aliases to ~2^64 and fails. 58 > worst-case
+/// |out| (~2^52) and < 64.
 const DIFF_RANGE_BITS: usize = 58;
 
 /// Convert a signed integer to a Goldilocks field element.
@@ -110,41 +115,70 @@ pub struct ProofBundle {
     pub h: [u64; 4],
 }
 
-/// The compiled moderation circuit for one specific public model.
+/// The compiled moderation circuit for one specific public MLP model.
 pub struct ModerationCircuit {
     pub model: Model,
     data: CircuitData<F, C, D>,
     f_targets: Vec<Target>,
+    /// Per-hidden-neuron ReLU positive/negative parts (set at proving time).
+    relu_pos: Vec<Target>,
+    relu_neg: Vec<Target>,
     msg_targets: Vec<Target>,
     r_target: Target,
 }
 
 impl ModerationCircuit {
-    /// Build the circuit for a given model. Expensive; do this once at startup.
+    /// Build the circuit for a given MLP model. Expensive; do once at startup.
     pub fn new(model: Model) -> Self {
         let config = CircuitConfig::standard_recursion_config();
         let mut builder = CircuitBuilder::<F, D>::new(config);
 
-        // ---- Classifier: theta_q . f + bias_q >= tau_q --------------------
-        let f_targets: Vec<Target> = (0..model.d).map(|_| builder.add_virtual_target()).collect();
+        let h_dim = model.hidden_dim;
 
-        // Range-check each feature to |f| <= 2^20 (wrap-attack protection).
+        // ---- Inputs: feature vector, range-checked ------------------------
+        let f_targets: Vec<Target> = (0..model.d).map(|_| builder.add_virtual_target()).collect();
         let feat_offset = F::from_canonical_u64(FEATURE_ABS_MAX);
         for &f in &f_targets {
             let shifted = builder.add_const(f, feat_offset);
             builder.range_check(shifted, FEATURE_RANGE_BITS);
         }
 
-        // score = bias + sum_i theta_i * f_i   (theta_i baked in as constants).
-        let mut score = builder.constant(f_from_i64(model.bias_q));
-        for (i, &f) in f_targets.iter().enumerate() {
-            let theta_i = builder.constant(f_from_i64(model.theta_q[i]));
-            score = builder.mul_add(theta_i, f, score);
+        // ---- Layer 1 + ReLU:  h1_i = relu( W1_i . f + b1_i ) --------------
+        let zero = builder.zero();
+        let mut relu_pos = Vec::with_capacity(h_dim);
+        let mut relu_neg = Vec::with_capacity(h_dim);
+        let mut h1 = Vec::with_capacity(h_dim);
+        for i in 0..h_dim {
+            let mut acc = builder.constant(f_from_i64(model.b1_q[i]));
+            for j in 0..model.d {
+                let w = builder.constant(f_from_i64(model.w1_q[i][j]));
+                acc = builder.mul_add(w, f_targets[j], acc);
+            }
+            // ReLU gadget: acc = pos - neg, with pos,neg >= 0 and pos*neg = 0.
+            let pos = builder.add_virtual_target();
+            let neg = builder.add_virtual_target();
+            builder.range_check(pos, RELU_RANGE_BITS);
+            builder.range_check(neg, RELU_RANGE_BITS);
+            let diff = builder.sub(pos, neg);
+            builder.connect(acc, diff);
+            let prod = builder.mul(pos, neg);
+            builder.connect(prod, zero);
+
+            relu_pos.push(pos);
+            relu_neg.push(neg);
+            h1.push(pos); // relu(acc) = pos
         }
 
-        // margin = score - tau ; prove margin in [0, 2^58) (i.e. score >= tau).
+        // ---- Layer 2:  out = W2 . h1 + b2 ---------------------------------
+        let mut out = builder.constant(f_from_i64(model.b2_q));
+        for i in 0..h_dim {
+            let w = builder.constant(f_from_i64(model.w2_q[i]));
+            out = builder.mul_add(w, h1[i], out);
+        }
+
+        // margin = out - tau ; prove margin in [0, 2^58) (i.e. out >= tau).
         let tau = builder.constant(f_from_i64(model.tau_q));
-        let margin = builder.sub(score, tau);
+        let margin = builder.sub(out, tau);
         builder.range_check(margin, DIFF_RANGE_BITS);
 
         // ---- Commitment: h = Poseidon(pack(m), r) -------------------------
@@ -156,23 +190,22 @@ impl ModerationCircuit {
         hash_inputs.push(r_target);
         let h_target: HashOutTarget =
             builder.hash_n_to_hash_no_pad::<PoseidonHash>(hash_inputs);
-
-        // h is the only public input (4 field elements).
         builder.register_public_inputs(&h_target.elements);
 
         let data = builder.build::<C>();
-        Self { model, data, f_targets, msg_targets, r_target }
+        Self { model, data, f_targets, relu_pos, relu_neg, msg_targets, r_target }
     }
 
-    /// Prove that `message` passes the classifier and commit to it under `r`.
+    /// Prove that `message` passes the MLP classifier and commit to it under `r`.
     /// Fails (returns Err) if the message does not actually pass — an honest
     /// prover cannot forge a proof for disallowed content.
     pub fn prove(&self, message: &str, r: u64) -> Result<ProofBundle> {
         let bytes = message.as_bytes();
         anyhow::ensure!(bytes.len() <= MAX_MSG_BYTES, "message too long");
-        let features = features::feature_vector(message, self.model.d);
+        let m = &self.model;
+        let features = features::feature_vector(message, m.d);
         anyhow::ensure!(
-            self.model.allowed(&features),
+            m.allowed(&features),
             "message is classified as blocked; refusing to prove"
         );
         for &v in &features {
@@ -183,9 +216,24 @@ impl ModerationCircuit {
         }
 
         let mut pw = PartialWitness::new();
-        for (i, &t) in self.f_targets.iter().enumerate() {
-            pw.set_target(t, f_from_i64(features[i]));
+        for (j, &t) in self.f_targets.iter().enumerate() {
+            pw.set_target(t, f_from_i64(features[j]));
         }
+
+        // Recompute hidden pre-activations to fill the ReLU pos/neg witnesses.
+        let relu_bound = 1i64 << RELU_RANGE_BITS;
+        for i in 0..m.hidden_dim {
+            let mut acc = m.b1_q[i];
+            let row = &m.w1_q[i];
+            for j in 0..m.d {
+                acc += row[j] * features[j];
+            }
+            anyhow::ensure!(acc.abs() < relu_bound, "hidden pre-activation exceeds ReLU bound");
+            let (pos_v, neg_v) = if acc >= 0 { (acc, 0) } else { (0, -acc) };
+            pw.set_target(self.relu_pos[i], f_from_i64(pos_v));
+            pw.set_target(self.relu_neg[i], f_from_i64(neg_v));
+        }
+
         let preimage = pack_preimage(bytes, r);
         for (i, &t) in self.msg_targets.iter().enumerate() {
             pw.set_target(t, preimage[i]);
@@ -228,13 +276,17 @@ impl ModerationCircuit {
 mod tests {
     use super::*;
 
+    /// Trivial MLP: 1 hidden neuron summing all features, output = relu(sum).
+    /// relu(...) >= 0 always, so this model always "allows" — handy for the
+    /// prove/verify plumbing tests independent of any real classifier.
     fn tiny_model(d: usize) -> Model {
-        // A trivial model: score = sum(f) ; allowed iff sum(f) >= 0.
         Model {
             d,
-            scale: 1,
-            theta_q: vec![1; d],
-            bias_q: 0,
+            hidden_dim: 1,
+            w1_q: vec![vec![1; d]],
+            b1_q: vec![0],
+            w2_q: vec![1],
+            b2_q: 0,
             tau_q: 0,
         }
     }
@@ -250,38 +302,24 @@ mod tests {
 
     #[test]
     fn honest_bundle_h_equals_plain_commitment() {
-        // The h in the proof bundle must equal the plain Poseidon commitment the
-        // receiver recomputes — this is what makes the receiver binding check
-        // accept honest messages and reject forged ones.
         let circuit = ModerationCircuit::new(tiny_model(64));
         let msg = "hello there friend";
         let r = 424242;
-        if circuit.model.allowed(&features::feature_vector(msg, 64)) {
-            let bundle = circuit.prove(msg, r).expect("prove");
-            assert_eq!(bundle.h, commitment(msg.as_bytes(), r), "in/out-of-circuit hash mismatch");
-            // A different plaintext under the same r must NOT match (forgery caught).
-            assert_ne!(bundle.h, commitment(b"a different message", r));
-        }
+        assert!(circuit.model.allowed(&features::feature_vector(msg, 64)));
+        let bundle = circuit.prove(msg, r).expect("prove");
+        assert_eq!(bundle.h, commitment(msg.as_bytes(), r), "in/out-of-circuit hash mismatch");
+        assert_ne!(bundle.h, commitment(b"a different message", r));
     }
 
     #[test]
     fn prove_and_verify_roundtrip() {
-        // Model allows when sum(features) >= 0. Craft a message; if it happens
-        // to be blocked, this still exercises the allowed path via tiny_model
-        // whose bias makes most short messages pass (sum near 0). We assert on
-        // whatever the plain model says to keep the test deterministic.
         let circuit = ModerationCircuit::new(tiny_model(64));
         let msg = "hello there friend";
-        let feats = features::feature_vector(msg, 64);
-        if circuit.model.allowed(&feats) {
-            let bundle = circuit.prove(msg, 999).expect("prove");
-            assert!(circuit.verify(&bundle.proof_bytes, &bundle.h));
-            // Tampered h must be rejected.
-            let mut bad_h = bundle.h;
-            bad_h[0] ^= 1;
-            assert!(!circuit.verify(&bundle.proof_bytes, &bad_h));
-        } else {
-            assert!(circuit.prove(msg, 999).is_err());
-        }
+        let bundle = circuit.prove(msg, 999).expect("prove");
+        assert!(circuit.verify(&bundle.proof_bytes, &bundle.h));
+        // Tampered h must be rejected.
+        let mut bad_h = bundle.h;
+        bad_h[0] ^= 1;
+        assert!(!circuit.verify(&bundle.proof_bytes, &bad_h));
     }
 }

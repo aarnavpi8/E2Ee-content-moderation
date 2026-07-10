@@ -30,7 +30,7 @@ The design combines two mechanisms:
 | `r` | random blinding nonce (per message) |
 | `φ(m)` | length-`d` signed feature-hash vector (see `moderation/features.py`) |
 | `θ_q, b_q, τ_q` | public integer-quantised classifier weights, bias, threshold |
-| `C_θ(f)` | classifier predicate: `1` iff `Σ θ_q[i]·f[i] + b_q ≥ τ_q` (== "allowed") |
+| `C_θ(f)` | MLP classifier predicate: `1` iff `W2_q · relu(W1_q·f + b1_q) + b2_q ≥ τ_q` (== "allowed"), one hidden layer of width H=16 |
 | `h` | Poseidon commitment `Poseidon(m, r)` |
 | `π` | Plonky2 proof |
 | `AD` | AEAD Associated Data field of the Double Ratchet message |
@@ -128,9 +128,11 @@ N3. **Model governance.** Whoever controls the public model controls what is
    censorable. This system enforces *a* model verifiably; it does not decide
    *which* model is legitimate, nor prevent abuse of that power.
 
-N4. **Classifier robustness.** The linear classifier can be evaded by
-   adversarial perturbations (synonyms, homoglyphs, zero-width characters).
-   Phase 6 quantifies this; the protocol does not claim a robust classifier.
+N4. **Classifier robustness.** The MLP classifier can be evaded by adversarial
+   perturbations (synonyms, homoglyphs, zero-width characters). Phase 6
+   quantifies this (the MLP is no more robust than a linear model, since the
+   attack targets the feature hashing); the protocol does not claim a robust
+   classifier.
 
 N5. **Metadata privacy.** Sender/recipient identities, timing, and message sizes
    are handled exactly as in the base messenger — not improved by this work.
@@ -141,7 +143,8 @@ N6. **Denial of service.** A sender can always withhold a valid proof; the
 
 ## 8. Parameters (finalised)
 
+* Classifier: 1-hidden-layer MLP, hidden width `H = 16`, ReLU activation.
 * Feature dimensions swept: `d ∈ {64, 256, 1024}` (default/deployment: `d = 256`).
-* Weight quantisation scale: `2^16` (lossless vs float at d = 256).
+* Weight quantisation scale: `2^12` per layer (integer MLP matches float MLP).
 * Commitment: Poseidon over Goldilocks, `h = Poseidon(m, r)`.
 * Proof system: Plonky2 (transparent, native Rust, native Poseidon).

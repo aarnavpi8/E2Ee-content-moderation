@@ -4,6 +4,13 @@ A from-scratch implementation of the [Signal Protocol](https://signal.org/docs/)
 
 ---
 
+> **Verifiable content moderation.** This repo also adds a zero-knowledge
+> moderation gate on top of the messenger: a sender proves (Plonky2) that the
+> plaintext passes a public MLP classifier and commits to it with Poseidon; the
+> server verifies the proof before relaying without ever decrypting. See
+> [content_moderation_demo.md](content_moderation_demo.md) for the build + demo,
+> and `phase0`/`phase2`/`phase7` docs for design and results.
+
 ## Quickstart
 
 You need three terminals.

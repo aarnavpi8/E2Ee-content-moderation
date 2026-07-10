@@ -52,13 +52,23 @@ def load_model():
         return json.load(fh)
 
 
+def mlp_forward(phi, model):
+    """Integer MLP forward: out = W2 . relu(W1 . phi + b1) + b2."""
+    w1, b1, w2, b2 = model["w1_q"], model["b1_q"], model["w2_q"], model["b2_q"]
+    out = b2
+    for i in range(model["hidden_dim"]):
+        row = w1[i]
+        acc = b1[i]
+        for j, v in enumerate(phi):
+            if v:
+                acc += row[j] * v
+        if acc > 0:
+            out += w2[i] * acc  # relu
+    return out
+
+
 def score(text, model):
-    phi = feature_vector(text, model["d"])
-    acc = model["bias_q"]
-    for i, v in enumerate(phi):
-        if v:
-            acc += model["theta_q"][i] * v
-    return acc
+    return mlp_forward(feature_vector(text, model["d"]), model)
 
 
 def token_spans(text):
@@ -79,18 +89,19 @@ def token_spans(text):
 
 
 def rank_spam_tokens(text, model):
-    """Rank token spans by how strongly they signal spam (most negative first)."""
-    d, theta = model["d"], model["theta_q"]
+    """Rank token spans by occlusion: how much removing the token raises the
+    (nonlinear MLP) score toward "allowed". Largest increase first — those are
+    the strongest spam-signal tokens to perturb. Model-agnostic (works for the
+    MLP where no single per-token weight exists)."""
+    base = score(text, model)
+    spans = token_spans(text)
     scored = []
-    for tok, s, e in token_spans(text):
-        low = tok.lower()
-        h_idx = fnv1a_64(low.encode())
-        h_sign = fnv1a_64(b"\x01" + low.encode())
-        idx = h_idx % d
-        sign = 1 if (h_sign & 1) == 0 else -1
-        contrib = sign * theta[idx]      # contribution to the "allowed" score
-        scored.append((contrib, tok, s, e))
-    scored.sort(key=lambda t: t[0])       # ascending: most spam-ish first
+    for tok, s, e in spans:
+        without = text[:s] + " " + text[e:]
+        delta = score(without, model) - base   # >0 means token pushed toward spam
+        # Sort key ascending -> most spam-ish first, so negate delta.
+        scored.append((-delta, tok, s, e))
+    scored.sort(key=lambda t: t[0])
     return scored
 
 
