@@ -41,10 +41,47 @@ pub fn tokenize(message: &str) -> Vec<Vec<u8>> {
     tokens
 }
 
+pub fn normalize_text(input: &str) -> String {
+    use unicode_normalization::UnicodeNormalization;
+    let mut normalized = String::new();
+    for ch in input.nfkd() {
+        match ch {
+            '\u{200b}'..='\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2060}'..='\u{206f}' | '\u{feff}' => {
+                // strip / skip
+            }
+            // Lowercase Cyrillic homoglyphs
+            'а' => normalized.push('a'),
+            'с' => normalized.push('c'),
+            'е' => normalized.push('e'),
+            'о' => normalized.push('o'),
+            'р' => normalized.push('p'),
+            'х' => normalized.push('x'),
+            'у' => normalized.push('y'),
+            'і' => normalized.push('i'),
+            'ј' => normalized.push('j'),
+            'ѕ' => normalized.push('s'),
+            // Uppercase Cyrillic homoglyphs
+            'А' => normalized.push('A'),
+            'С' => normalized.push('C'),
+            'Е' => normalized.push('E'),
+            'О' => normalized.push('O'),
+            'Р' => normalized.push('P'),
+            'Х' => normalized.push('X'),
+            'У' => normalized.push('Y'),
+            'І' => normalized.push('I'),
+            'Ј' => normalized.push('J'),
+            'Ѕ' => normalized.push('S'),
+            other => normalized.push(other),
+        }
+    }
+    normalized
+}
+
 /// Compute the length-`d` signed integer feature vector `phi(m)`.
 pub fn feature_vector(message: &str, d: usize) -> Vec<i64> {
+    let normalized = normalize_text(message);
     let mut phi = vec![0i64; d];
-    for tok in tokenize(message) {
+    for tok in tokenize(&normalized) {
         let h_idx = fnv1a_64(&tok);
         let mut sign_input = Vec::with_capacity(tok.len() + 1);
         sign_input.push(0x01u8);
@@ -75,5 +112,18 @@ mod tests {
             tokenize("Free entry, NOW!!"),
             vec![b"free".to_vec(), b"entry".to_vec(), b"now".to_vec()]
         );
+    }
+
+    #[test]
+    fn test_normalize_text() {
+        // Zero-width / invisible formatting characters stripping
+        assert_eq!(normalize_text("Fr\u{200b}ee\u{feff} e\u{200d}ntry"), "Free entry");
+
+        // Cyrillic homoglyph folding
+        assert_eq!(normalize_text("асеорхуі"), "aceopxyi");
+        assert_eq!(normalize_text("АСЕОРХУІ"), "ACEOPXYI");
+
+        // Styled mathematical characters (decomposed via NFKD)
+        assert_eq!(normalize_text("𝖥𝗋𝖾𝖾 𝖾𝗇𝗍𝗋𝗒"), "Free entry");
     }
 }

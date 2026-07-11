@@ -31,6 +31,8 @@ Algorithm
 4. Return phi, a length-d vector of (possibly negative) integers.
 """
 
+import unicodedata
+
 FNV_OFFSET_BASIS = 14695981039346656037   # 0xcbf29ce484222325
 FNV_PRIME = 1099511628211                 # 0x100000001b3
 U64_MASK = (1 << 64) - 1
@@ -43,6 +45,37 @@ def fnv1a_64(data: bytes) -> int:
         h ^= byte
         h = (h * FNV_PRIME) & U64_MASK
     return h
+
+
+def normalize_text(text: str) -> str:
+    """Normalize input string before tokenization and feature hashing to mitigate homoglyphs and zero-width characters."""
+    decomposed = unicodedata.normalize('NFKD', text)
+    homoglyphs = {
+        'а': 'a', 'А': 'A',
+        'с': 'c', 'С': 'C',
+        'е': 'e', 'Е': 'E',
+        'о': 'o', 'О': 'O',
+        'р': 'p', 'Р': 'P',
+        'х': 'x', 'Х': 'X',
+        'у': 'y', 'У': 'Y',
+        'і': 'i', 'І': 'I',
+        'ј': 'j', 'Ј': 'J',
+        'ѕ': 's', 'Ѕ': 'S',
+    }
+    
+    out = []
+    for ch in decomposed:
+        o = ord(ch)
+        # Strip zero-width / formatting/invisible characters
+        if (0x200B <= o <= 0x200F) or (0x202A <= o <= 0x202E) or (0x2060 <= o <= 0x206F) or (o == 0xFEFF):
+            continue
+        # Map homoglyphs
+        if ch in homoglyphs:
+            out.append(homoglyphs[ch])
+        else:
+            out.append(ch)
+            
+    return "".join(out)
 
 
 def tokenize(message: str):
@@ -64,8 +97,9 @@ def tokenize(message: str):
 
 def feature_vector(message: str, d: int):
     """Compute the length-d integer feature vector phi(m)."""
+    normalized = normalize_text(message)
     phi = [0] * d
-    for tok in tokenize(message):
+    for tok in tokenize(normalized):
         h_idx = fnv1a_64(tok)
         h_sign = fnv1a_64(b"\x01" + tok)
         idx = h_idx % d
@@ -76,7 +110,8 @@ def feature_vector(message: str, d: int):
 
 if __name__ == "__main__":
     # Quick self-test / demo used to cross-check the Rust port.
-    for msg in ["Free entry now!!", "hey are we still on for lunch"]:
+    for msg in ["Free entry now!!", "hey are we still on for lunch", "Fr\u200bee\ufeff e\u200dntry", "асеорхуі", "𝖥𝗋𝖾𝖾 𝖾𝗇𝗍𝗋𝗒"]:
+        print(f"Original: {repr(msg)} -> Normalized: {repr(normalize_text(msg))}")
         for d in (64, 256):
             phi = feature_vector(msg, d)
             nz = {i: v for i, v in enumerate(phi) if v != 0}

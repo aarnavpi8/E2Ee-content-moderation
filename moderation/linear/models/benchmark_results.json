@@ -1,0 +1,42 @@
+{
+  "baseline_prove_seconds": 3.0,
+  "iters": 30,
+  "results": [
+    {
+      "added_latency_ms_median": 54.60123899999999,
+      "added_latency_ms_p95": 76.385334,
+      "build_ms": 20.429040999999998,
+      "d": 64,
+      "proof_bytes": 94060,
+      "prove_ms_median": 46.827282999999994,
+      "prove_ms_p95": 68.499024,
+      "prove_speedup_vs_baseline_3s": 64.06521599811802,
+      "verify_ms_median": 7.7853200000000005,
+      "verify_ms_p95": 10.543621
+    },
+    {
+      "added_latency_ms_median": 101.00129799999999,
+      "added_latency_ms_p95": 191.651391,
+      "build_ms": 55.395412,
+      "d": 256,
+      "proof_bytes": 103404,
+      "prove_ms_median": 92.137941,
+      "prove_ms_p95": 183.056164,
+      "prove_speedup_vs_baseline_3s": 32.55987671788758,
+      "verify_ms_median": 8.771308,
+      "verify_ms_p95": 13.020287999999999
+    },
+    {
+      "added_latency_ms_median": 288.50863699999996,
+      "added_latency_ms_p95": 366.85878099999996,
+      "build_ms": 188.51647699999998,
+      "d": 1024,
+      "proof_bytes": 121480,
+      "prove_ms_median": 277.980979,
+      "prove_ms_p95": 356.398514,
+      "prove_speedup_vs_baseline_3s": 10.792105311637167,
+      "verify_ms_median": 10.59121,
+      "verify_ms_p95": 11.156768
+    }
+  ]
+}

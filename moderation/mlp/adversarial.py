@@ -1,36 +1,20 @@
 """
-Phase 6 - Adversarial Evaluation.
-
-Measures the *evasion rate* of the trained linear classifier under three
-perturbation classes, each constrained by a fixed budget k (max number of
-tokens perturbed):
-
-  1. Synonym substitution   - swap spam-indicative words for benign synonyms.
-  2. Homoglyph insertion    - replace ASCII letters with look-alike Unicode.
-  3. Whitespace / zero-width insertion - split tokens with U+200B / spaces.
-
-An "evasion" is a message the classifier originally BLOCKS (score < tau, i.e.
-labelled spam) that a budget-k perturbation flips to ALLOWED (score >= tau)
-while remaining human-legible.
-
-Greedy strategy: perturb the tokens contributing the strongest spam signal
-first (most negative theta contribution), up to the budget.
-
-Output: moderation/models/adversarial_results.json
+Phase 6 - Adversarial Evaluation (MLP variant).
 """
 
 import json
 import os
-
-from features import feature_vector, fnv1a_64
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, "data", "sms.tsv")
+sys.path.append(os.path.dirname(HERE))
+from features import feature_vector, fnv1a_64
+
+DATA = os.path.join(os.path.dirname(HERE), "data", "sms.tsv")
 OUT = os.path.join(HERE, "models")
 MODEL_FILE = os.path.join(OUT, "model_d256.json")
 BUDGETS = [1, 2, 3]
 
-# ---- Small hand-built synonym map (documented limitation, see write-up) -----
 SYNONYMS = {
     "free": "complimentary", "win": "earn", "winner": "recipient",
     "prize": "reward", "cash": "funds", "urgent": "timely",
@@ -89,17 +73,12 @@ def token_spans(text):
 
 
 def rank_spam_tokens(text, model):
-    """Rank token spans by occlusion: how much removing the token raises the
-    (nonlinear MLP) score toward "allowed". Largest increase first — those are
-    the strongest spam-signal tokens to perturb. Model-agnostic (works for the
-    MLP where no single per-token weight exists)."""
     base = score(text, model)
     spans = token_spans(text)
     scored = []
     for tok, s, e in spans:
         without = text[:s] + " " + text[e:]
-        delta = score(without, model) - base   # >0 means token pushed toward spam
-        # Sort key ascending -> most spam-ish first, so negate delta.
+        delta = score(without, model) - base
         scored.append((-delta, tok, s, e))
     scored.sort(key=lambda t: t[0])
     return scored
@@ -108,9 +87,8 @@ def rank_spam_tokens(text, model):
 def perturb_token(tok, kind):
     low = tok
     if kind == "synonym":
-        return SYNONYMS.get(tok.lower())          # None if no synonym known
+        return SYNONYMS.get(tok.lower())
     if kind == "homoglyph":
-        # Replace up to 2 letters with homoglyphs (enough to break the hash).
         out, changed = [], 0
         for ch in low:
             if changed < 2 and ch.lower() in HOMOGLYPHS:
@@ -128,11 +106,9 @@ def perturb_token(tok, kind):
 
 
 def try_evade(text, model, kind, budget):
-    """Apply greedy budget-k perturbation; return (evaded, perturbed_text)."""
     ranked = rank_spam_tokens(text, model)
     chars = list(text)
     used = 0
-    # Rebuild from spans so indices stay valid: collect replacements first.
     replacements = []
     for contrib, tok, s, e in ranked:
         if used >= budget:
@@ -144,7 +120,6 @@ def try_evade(text, model, kind, budget):
         used += 1
     if not replacements:
         return False, text
-    # Apply right-to-left so earlier indices remain valid.
     for s, e, rep in sorted(replacements, key=lambda t: t[0], reverse=True):
         chars[s:e] = list(rep)
     new_text = "".join(chars)
@@ -155,7 +130,6 @@ def try_evade(text, model, kind, budget):
 def main():
     model = load_model()
 
-    # Collect spam messages the model correctly BLOCKS.
     blocked_spam = []
     with open(DATA, encoding="utf-8") as fh:
         for line in fh:

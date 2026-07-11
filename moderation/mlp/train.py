@@ -6,30 +6,11 @@ moderation classifier on the SMS Spam Collection using the portable feature-
 hashing scheme in features.py, sweeps the hashed feature dimension
 d in {64, 256, 1024}, quantises the learned weights to integers, and exports
 everything the Rust ZK circuit needs.
-
-Architecture (matches the Plonky2 circuit exactly):
-    f            in Z^d          (integer feature-hash vector)
-    h1 = relu(W1 . f + b1)       W1: H x d,  b1: H          (scale S1)
-    out = W2 . h1 + b2           W2: H,      b2: scalar      (scale S1*S2)
-    allowed (ham) iff out >= tau_q
-
-Label convention (matches C_theta(f) = 1 == "passes filter"):
-    label 1 = ham   (benign / allowed to send)
-    label 0 = spam  (blocked)
-
-Integer forward is the ground truth the circuit enforces; ReLU is scale-
-equivariant (relu(s*x) = s*relu(x)), so quantising the weights preserves the
-sign of the output margin. We report both float and integer-MLP metrics.
-
-Outputs
--------
-    moderation/models/model_d{64,256,1024}.json   quantised MLP + metrics
-    moderation/models/metrics.json                 combined metrics table
-    moderation/models/test_vectors.json            cross-check vectors for Rust
 """
 
 import json
 import os
+import sys
 
 import numpy as np
 from sklearn.neural_network import MLPClassifier
@@ -38,10 +19,11 @@ from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, confusion_matrix,
 )
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(HERE))
 from features import feature_vector, FNV_OFFSET_BASIS, FNV_PRIME
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, "data", "sms.tsv")
+DATA = os.path.join(os.path.dirname(HERE), "data", "sms.tsv")
 OUT = os.path.join(HERE, "models")
 DIMS = [64, 256, 1024]
 HIDDEN_DIM = 16          # small MLP hidden layer
@@ -127,7 +109,6 @@ def main():
         clf.fit(Xtr, y_tr)
 
         # ---- Float baseline (decision = output logit >= 0 -> ham) -----------
-        # MLPClassifier binary output neuron: predict class 1 iff logit >= 0.
         y_pred_float = clf.predict(Xte)
         m_float = evaluate(y_te, y_pred_float)
 

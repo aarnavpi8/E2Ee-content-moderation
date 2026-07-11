@@ -1,88 +1,86 @@
 {
-  "arch": "mlp-1hidden-relu",
-  "hidden_dim": 16,
-  "s1": 4096,
-  "s2": 4096,
+  "arch": "linear-logistic",
+  "scale": 65536,
   "seed": 42,
   "dims": {
     "64": {
       "metrics_float": {
-        "accuracy": 0.9291,
-        "spam_precision": 0.7397,
-        "spam_recall": 0.7248,
-        "spam_f1": 0.7322,
+        "accuracy": 0.9157,
+        "spam_precision": 0.735,
+        "spam_recall": 0.5772,
+        "spam_f1": 0.6466,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            108,
-            41
+            86,
+            63
           ],
           [
-            38,
-            928
+            31,
+            935
           ]
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9291,
-        "spam_precision": 0.7397,
-        "spam_recall": 0.7248,
-        "spam_f1": 0.7322,
+        "accuracy": 0.9157,
+        "spam_precision": 0.735,
+        "spam_recall": 0.5772,
+        "spam_f1": 0.6466,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            108,
-            41
+            86,
+            63
           ],
           [
-            38,
-            928
+            31,
+            935
           ]
         ]
       }
     },
     "256": {
       "metrics_float": {
-        "accuracy": 0.9623,
-        "spam_precision": 0.8543,
+        "accuracy": 0.9695,
+        "spam_precision": 0.9021,
         "spam_recall": 0.8658,
-        "spam_f1": 0.86,
+        "spam_f1": 0.8836,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
             129,
             20
           ],
           [
-            22,
-            944
+            14,
+            952
           ]
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9623,
-        "spam_precision": 0.8543,
+        "accuracy": 0.9695,
+        "spam_precision": 0.9021,
         "spam_recall": 0.8658,
-        "spam_f1": 0.86,
+        "spam_f1": 0.8836,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
             129,
             20
           ],
           [
-            22,
-            944
+            14,
+            952
           ]
         ]
       }
     },
     "1024": {
       "metrics_float": {
-        "accuracy": 0.9758,
-        "spam_precision": 0.9621,
-        "spam_recall": 0.8523,
-        "spam_f1": 0.9039,
+        "accuracy": 0.9749,
+        "spam_precision": 0.9618,
+        "spam_recall": 0.8456,
+        "spam_f1": 0.9,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            127,
-            22
+            126,
+            23
           ],
           [
             5,
@@ -91,14 +89,14 @@
         ]
       },
       "metrics_quantized": {
-        "accuracy": 0.9758,
-        "spam_precision": 0.9621,
-        "spam_recall": 0.8523,
-        "spam_f1": 0.9039,
+        "accuracy": 0.9749,
+        "spam_precision": 0.9618,
+        "spam_recall": 0.8456,
+        "spam_f1": 0.9,
         "confusion_matrix_[[tn,fp],[fn,tp]]": [
           [
-            127,
-            22
+            126,
+            23
           ],
           [
             5,

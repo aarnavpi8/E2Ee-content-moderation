@@ -12,7 +12,7 @@
         "140": -1,
         "151": 1
       },
-      "score_q": 74374092,
+      "score_q": 114770,
       "prediction": "ham/allowed"
     },
     {
@@ -27,7 +27,7 @@
         "144": -1,
         "169": 1
       },
-      "score_q": 138451098,
+      "score_q": 339272,
       "prediction": "ham/allowed"
     },
     {
@@ -40,7 +40,7 @@
         "207": 1,
         "240": -1
       },
-      "score_q": 121994308,
+      "score_q": 289425,
       "prediction": "ham/allowed"
     },
     {
@@ -52,7 +52,7 @@
         "92": -1,
         "239": 1
       },
-      "score_q": 185818284,
+      "score_q": 373542,
       "prediction": "ham/allowed"
     }
   ]

@@ -1,11 +1,10 @@
-//! Cross-language parity test: the Rust feature-hashing + linear classifier
+//! Cross-language parity test: the Rust feature-hashing + MLP classifier
 //! must reproduce, bit-for-bit, the values Python wrote into
-//! `moderation/models/test_vectors.json` (Phase 1). This is the guardrail that
-//! keeps the circuit's notion of the model in lock-step with the trained one.
+//! `moderation/mlp/models/test_vectors.json`.
 
 use std::collections::BTreeMap;
 
-use moderation_core::{features::feature_vector, Model};
+use moderation_core::{features::feature_vector, mlp::Model};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -27,6 +26,7 @@ fn models_dir() -> std::path::PathBuf {
     std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("..")
         .join("moderation")
+        .join("mlp")
         .join("models")
 }
 

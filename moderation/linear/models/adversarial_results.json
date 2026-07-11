@@ -1,19 +1,19 @@
 {
   "d": 256,
-  "num_blocked_spam": 724,
+  "num_blocked_spam": 672,
   "classes": {
     "synonym": {
       "budget_1": {
-        "evaded": 13,
-        "evasion_rate": 0.018
+        "evaded": 29,
+        "evasion_rate": 0.0432
       },
       "budget_2": {
-        "evaded": 42,
-        "evasion_rate": 0.058
+        "evaded": 48,
+        "evasion_rate": 0.0714
       },
       "budget_3": {
-        "evaded": 50,
-        "evasion_rate": 0.0691
+        "evaded": 53,
+        "evasion_rate": 0.0789
       }
     },
     "homoglyph": {
@@ -47,8 +47,8 @@
   },
   "examples": {
     "synonym": {
-      "original": "Urgent Ur £500 guaranteed award is still unclaimed! Call 09066368327 NOW closingdate04/09/02 claimcode M39M51 £1.50pmmorefrommobile2Bremoved-MobyPOBox734LS27YF",
-      "perturbed": "Urgent Ur £500 assured award is still unclaimed! Call 09066368327 NOW closingdate04/09/02 claimcode M39M51 £1.50pmmorefrommobile2Bremoved-MobyPOBox734LS27YF"
+      "original": "XXXMobileMovieClub: To use your credit, click the WAP link in the next txt message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL",
+      "perturbed": "XXXMobileMovieClub: To use your credit, click the WAP link in the next message message or click here>> http://wap. xxxmobilemovieclub.com?n=QJKGIGHJJGCBL"
     }
   }
 }
