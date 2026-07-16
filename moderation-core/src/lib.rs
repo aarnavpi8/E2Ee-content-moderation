@@ -9,6 +9,9 @@ pub mod features;
 pub mod linear;
 pub mod mlp;
 
+pub use mlp::Model;
+pub use mlp::Circuit as ModerationCircuit;
+
 use plonky2::field::goldilocks_field::GoldilocksField;
 use plonky2::field::types::{Field, PrimeField64};
 use plonky2::hash::poseidon::PoseidonHash;
